@@ -13,7 +13,6 @@ The example provided in this application performs the following
 
 ## Dependencies
 * ROS
-* Python 3.5 / 3.6
 * ar_glass (AR Glass ROS Driver package)
 
 Tested on Ubuntu 16.04 ROS Kinetic
