@@ -1,0 +1,6 @@
+<launch>	
+  <!-- Launch User Application -->
+  <node pkg="user_application" type="application.py" name="application" output="screen">
+    <rosparam command="load" file="$(find user_application)/config/parameters.yaml" />
+  </node>
+</launch>
