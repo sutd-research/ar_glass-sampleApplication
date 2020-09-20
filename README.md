@@ -13,9 +13,29 @@ The example provided in this application performs the following
 
 ## Dependencies
 * ROS
+* Python 2.7x
 * ar_glass (AR Glass ROS Driver package)
 
 Tested on Ubuntu 16.04 ROS Kinetic
+
+**Compiling** <br /> 
+* Copy the package into catkin workspace. 
+    > (For information regading ROS installation and creating a catkin workspace, please refer ROS installation tutorials)
+* Compile the package
+    ```
+    # Open a terminal and go to catkin workspace directory
+    cd ~/catkin_ws
+
+    # Compile the package
+    catkin_make --only-pkg-with-deps user_application
+    ```
+    > **Note**: ar_glass ROS Package (ar_glass-driver) must be present in the workspace folder, in order to compile this pacakge.
+
+* Run the package
+    ```
+    roslaunch user_application application.launch
+    ```
+    > **Note**: ar_glass package should be launched before launching this package. 
 
 #### Published Topics
 - sensor_msgs/Image : /AR_Send_Image
@@ -23,9 +43,6 @@ Tested on Ubuntu 16.04 ROS Kinetic
 #### Services
 - ar_glass/Image: /AR_Take_Image
 
-
-###### Compile and run the package
->       roslaunch user_application application.launch
 
 #### Permissions:
 In some cases, it might be required to provide execution permissions to the python executable.
