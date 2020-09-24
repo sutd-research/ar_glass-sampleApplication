@@ -6,9 +6,9 @@ The example provided in this application performs the following
 1. Requests an image from AR Glass ROS Driver
     > Request will be done using a service call to the AR Glass ROS Driver. The AR Glass ROS Driver will reply to the service call with an image.
 2. Process the Received Image
-    > Here user can add his own functionality. (Ex: Draw object detection markers on the received image)
-3. Send back the processed image to the AR Glass ROS Driver
-   > AR Glass ROS Driver is subscribed to an image topic. Any image published to this topic will be sent to the AR Glass. The application will publish the processed image to this topic.
+    > Here user can add his own functionality. (Ex: Draw object detection markers on the received image). The output should be bounding box coordinates
+3. Send bounding box information to the AR Glass ROS Driver
+   > AR Glass ROS Driver is subscribed to a bounding box information topic. Any message published to this topic will be sent to the AR Glass. The application will publish the bounding box coordinates to this topic.
 
 
 ## Dependencies
@@ -38,7 +38,19 @@ Tested on Ubuntu 16.04 ROS Kinetic
     > **Note**: ar_glass package should be launched before launching this package. 
 
 #### Published Topics
-- sensor_msgs/Image : /AR_Send_Image
+- ar_glass/BoundingBox : /AR_Send_Image
+  
+    ```             
+    std_msgs/Header header
+        uint32 seq
+        time stamp
+        string frame_id
+    int32 left_x
+    int32 right_x
+    int32 top_y
+    int32 bottom_y
+    ```
+            
   
 #### Services
 - ar_glass/Image: /AR_Take_Image

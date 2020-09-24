@@ -3,13 +3,14 @@ import rospy
 import sys
 import signal
 from ar_glass.srv import Image as ImageSrv
+from ar_glass.msg import BoundingBox
 from ar_glass.srv import ImageRequest, ImageResponse
 from sensor_msgs.msg import Image as ImageMsg 
 from cv_bridge import CvBridge
 import cv2
 
 request_service = None
-image_publisher = None
+bounding_box_publisher = None
 bridge = CvBridge()
 header = None
 
@@ -17,27 +18,26 @@ def process_image(image):
     """
         User function to process the image received from AR Glass
         :param image:   Received image from AR Glass (BGR Color Encoding)
-        :return     processed_image   
-                        Processed image, to be sent back to AR Glass
+        :return     bounding box coordinates
     """
     ##################################################################
     ######################### Example User Code ######################
-    processed_image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE) 
+    # processed_image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE) 
+    boundingBox = (150, 50, 50, 150)
     ##################################################################
+    return boundingBox
 
-    return processed_image
-
-def send_image(image):
+def send_bounding_box(coordinates):
     """
-        Sends an image to AR Glass Driver
-        :param image: Image     (bgr8 color encoded)
+        Sends a bounding box to AR Glass Driver
+        :param coordinates: (leftx, topy, rightx, bottomy)
     """
-    image_msg = bridge.cv2_to_imgmsg(image, encoding="bgr8")
 
-    # Sending image will be sent with the same header as the last received image, 
-    # since the processed image corresponds to the last received image
-    image_msg.header = header
-    image_publisher.publish(image_msg)
+    box = BoundingBox()
+    box.left_x, box.top_y, box.right_x, box.bottom_y = coordinates
+
+    box.header = header
+    bounding_box_publisher.publish(box)
 
 def get_image():
     """
@@ -67,7 +67,7 @@ def init():
     image_topic_name = rospy.get_param(rospy.get_name()+"/image_publisher_topic", 'AR_Send_Image')
 
     # Registering Service Client
-    global request_service, image_publisher
+    global request_service, bounding_box_publisher
     try:
         # Check if service is available
         rospy.wait_for_service(request_service_name, timeout=3)
@@ -77,7 +77,7 @@ def init():
         terminate()
 
     # Registering Publisher
-    image_publisher = rospy.Publisher(image_topic_name, ImageMsg, queue_size=10)
+    bounding_box_publisher = rospy.Publisher(image_topic_name, BoundingBox, queue_size=10)
 
     # Wait for initialization
     rospy.sleep(0.5)
@@ -93,8 +93,8 @@ def application():
         try:
             image = get_image()
             rospy.loginfo("Image Received from AR Glass Successfully. Image size: [%d, %d]" %(image.shape[0], image.shape[1]))
-            processed_image = process_image(image)
-            send_image(processed_image)
+            bounding_box_coordinates = process_image(image)
+            send_bounding_box(bounding_box_coordinates)
         except Exception as e:
             rospy.logwarn ("Exception:" + str(e))
 
