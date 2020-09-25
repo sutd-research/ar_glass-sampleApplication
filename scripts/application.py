@@ -3,11 +3,12 @@ import rospy
 import sys
 import signal
 from ar_glass.srv import Image as ImageSrv
-from ar_glass.msg import BoundingBox
+from ar_glass.msg import BoundingBoxesStamped, BoundingBox
 from ar_glass.srv import ImageRequest, ImageResponse
 from sensor_msgs.msg import Image as ImageMsg 
 from cv_bridge import CvBridge
 import cv2
+import copy
 
 request_service = None
 bounding_box_publisher = None
@@ -18,26 +19,41 @@ def process_image(image):
     """
         User function to process the image received from AR Glass
         :param image:   Received image from AR Glass (BGR Color Encoding)
-        :return     bounding box coordinates
+        :return     bounding boxes (coordinates)
     """
     ##################################################################
     ######################### Example User Code ######################
     # processed_image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE) 
-    boundingBox = (150, 50, 50, 150)
-    ##################################################################
-    return boundingBox
-
-def send_bounding_box(coordinates):
-    """
-        Sends a bounding box to AR Glass Driver
-        :param coordinates: (leftx, topy, rightx, bottomy)
-    """
+    boxes = []
 
     box = BoundingBox()
-    box.left_x, box.top_y, box.right_x, box.bottom_y = coordinates
+    box.label = "Example"
+    box.x1 = 150
+    box.y1 = 50
+    box.x2 = 50
+    box.y2 = 150
 
-    box.header = header
-    bounding_box_publisher.publish(box)
+    boxes.append(box)
+    ##################################################################
+
+    return boxes
+
+def send_bounding_boxes(box_list):
+    """
+        Sends a list of bounding boxes to AR Glass Driver
+        :param coordinates: box_list 
+                                type list (BoundingBox)
+    """
+
+
+    bounding_boxes = BoundingBoxesStamped()
+    bounding_boxes.boxes = copy.deepcopy(box_list)
+
+    ## The Same header of the corresponding image is used here ##
+    ## This can be changed by user if required ##
+    bounding_boxes.header = header
+    
+    bounding_box_publisher.publish(bounding_boxes)
 
 def get_image():
     """
@@ -77,7 +93,7 @@ def init():
         terminate()
 
     # Registering Publisher
-    bounding_box_publisher = rospy.Publisher(image_topic_name, BoundingBox, queue_size=10)
+    bounding_box_publisher = rospy.Publisher(image_topic_name, BoundingBoxesStamped, queue_size=10)
 
     # Wait for initialization
     rospy.sleep(0.5)
@@ -93,8 +109,8 @@ def application():
         try:
             image = get_image()
             rospy.loginfo("Image Received from AR Glass Successfully. Image size: [%d, %d]" %(image.shape[0], image.shape[1]))
-            bounding_box_coordinates = process_image(image)
-            send_bounding_box(bounding_box_coordinates)
+            bounding_boxes = process_image(image)
+            send_bounding_boxes(bounding_boxes)
         except Exception as e:
             rospy.logwarn ("Exception:" + str(e))
 

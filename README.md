@@ -38,17 +38,19 @@ Tested on Ubuntu 16.04 ROS Kinetic
     > **Note**: ar_glass package should be launched before launching this package. 
 
 #### Published Topics
-- ar_glass/BoundingBox : /AR_Send_Image
+- ar_glass/BoundingBoxesStamped : /AR_Send_Image
   
     ```             
     std_msgs/Header header
         uint32 seq
         time stamp
         string frame_id
-    int32 left_x
-    int32 right_x
-    int32 top_y
-    int32 bottom_y
+    ar_glass/BoundingBox[] boxes
+        string label
+        int32 x1
+        int32 y1
+        int32 x2
+        int32 y2
     ```
             
   
